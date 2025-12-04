@@ -7,8 +7,9 @@ A comprehensive AI-powered system for detecting job scams using Google Gemini LL
 ## Features
 
 - **AI-Powered Analysis**: Uses Google Gemini LLM to analyze text for scam indicators
+- **LLM Comparison**: Compare detection accuracy between Gemini and ChatGPT
 - **Prompt Engineering**: Sophisticated prompt design for accurate scam detection
-- **Risk Scoring**: Provides 0-100 risk scores based on Gemini's scam probability
+- **Risk Scoring**: Provides 0-100 risk scores based on LLM's scam probability
 - **Comprehensive Reporting**: Generates detailed analysis reports with insights
 - **Visualization**: Creates charts and graphs to visualize scam patterns
 - **Batch Processing**: Analyzes large datasets of complaints efficiently
@@ -36,13 +37,21 @@ A comprehensive AI-powered system for detecting job scams using Google Gemini LL
    pip install -r requirements.txt
    ```
 
-4. **Get Google Gemini API Key:**
-   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Create a new API key
-   - Set it as an environment variable:
-     ```bash
-     export GEMINI_API_KEY="your_api_key_here"
-     ```
+4. **Get API Keys:**
+   - **Google Gemini API Key:**
+     - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+     - Create a new API key
+     - Set it as an environment variable:
+       ```bash
+       export GEMINI_API_KEY="your_api_key_here"
+       ```
+   - **OpenAI API Key (for comparison feature):**
+     - Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+     - Create a new API key
+     - Set it as an environment variable:
+       ```bash
+       export OPENAI_API_KEY="your_api_key_here"
+       ```
 
 ## Usage
 
@@ -87,6 +96,43 @@ This creates charts in the `visualizations/` folder showing:
 - Comprehensive dashboard
 
 **Important**: You must run the analysis first (`main.py`) before generating visualizations, as the visualization script reads from the results files.
+
+### Compare LLM Detection Accuracy
+
+Compare detection results between Gemini and ChatGPT on the same dataset:
+
+```bash
+python compare_llms.py --input "data/data-ashley.csv"
+```
+
+**With custom options:**
+```bash
+# Specify API keys directly
+python compare_llms.py --input "data/data-ashley.csv" \
+  --gemini-api-key "your_gemini_key" \
+  --openai-api-key "your_openai_key"
+
+# Use different OpenAI model
+python compare_llms.py --input "data/data-ashley.csv" \
+  --openai-model "gpt-4"
+
+# Limit number of complaints for testing
+python compare_llms.py --input "data/data-ashley.csv" \
+  --max-complaints 10
+```
+
+This will:
+- Analyze each complaint with both Gemini and ChatGPT
+- Compare risk scores and category classifications
+- Calculate agreement rates and correlation metrics
+- Save comparison results to `detect_res/llm_comparison_*.csv`
+- Generate a comparison report in `detect_res/llm_comparison_report_*.json`
+
+The comparison report includes:
+- **Agreement Rate**: Percentage of cases where both LLMs agree on risk category
+- **Average Scores**: Mean risk scores from each LLM
+- **Correlation**: Statistical correlation between the two LLM scores
+- **Disagreement Breakdown**: Analysis of cases where LLMs disagree
 
 ### Custom Analysis
 
@@ -278,6 +324,7 @@ scam_detector/          # Main package
 ├── detector.py        # Main detector class
 ├── text_processor.py  # Text preprocessing and indicators
 ├── gemini_client.py   # Gemini API wrapper
+├── openai_client.py   # OpenAI/ChatGPT API wrapper
 ├── prompt_scam_analysis.py  # AI prompt templates
 ├── report_generator.py # Report generation
 └── file_handler.py    # File I/O operations
@@ -285,7 +332,8 @@ scam_detector/          # Main package
 detect_res/            # Output directory for analysis results
 visualizations/        # Generated visualization charts
 data/                  # Input data files
-main.py               # New entry point (CLI)
+main.py               # Main entry point (CLI)
+compare_llms.py       # LLM comparison script
 job_scam_detector.py  # Legacy wrapper (backward compatible)
 visualize_results.py  # Visualization script
 ```
