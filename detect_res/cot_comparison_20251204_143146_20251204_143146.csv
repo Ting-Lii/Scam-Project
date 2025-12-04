@@ -1,0 +1,11 @@
+complaint_id,timestamp,text_length,gemini_standard_score,gemini_cot_score,gemini_score_difference,gemini_score_change,gemini_standard_confidence,gemini_cot_confidence,gemini_has_reasoning,gemini_red_flags_std,gemini_red_flags_cot,openai_standard_score,openai_cot_score,openai_score_difference,openai_score_change,openai_standard_confidence,openai_cot_confidence,openai_has_reasoning,openai_red_flags_std,openai_red_flags_cot
+1306236,2025-12-04T14:26:45.636822,1365,95,95,0,0,98,98,True,16,13,95,95,0,0,98,90,True,9,11
+1617882,2025-12-04T14:27:53.690252,2510,95,90,5,-5,95,95,True,14,12,95,90,5,-5,90,90,True,8,10
+2060433,2025-12-04T14:28:33.288206,986,95,90,5,-5,95,95,True,9,6,90,95,5,5,95,90,True,3,4
+2105037,2025-12-04T14:29:05.620251,2080,95,90,5,-5,98,95,True,14,11,95,95,0,0,90,90,True,5,6
+2105053,2025-12-04T14:29:33.163533,3015,95,95,0,0,98,95,True,14,14,95,90,5,-5,90,90,True,5,9
+2317878,2025-12-04T14:29:57.735527,528,95,85,10,-10,98,95,True,6,2,95,95,0,0,90,90,True,2,3
+2318180,2025-12-04T14:30:22.127503,1207,90,85,5,-5,95,95,True,5,3,85,95,10,10,90,90,True,1,6
+2693172,2025-12-04T14:30:54.342840,2971,95,90,5,-5,98,95,True,19,16,95,95,0,0,98,90,True,9,9
+2949134,2025-12-04T14:31:24.791784,2193,95,90,5,-5,90,95,True,8,10,95,95,0,0,90,90,True,3,9
+3082144,2025-12-04T14:31:46.898376,1637,95,90,5,-5,98,95,True,5,6,95,95,0,0,90,90,True,3,4
