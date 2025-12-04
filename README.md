@@ -34,7 +34,7 @@ A comprehensive AI-powered system for detecting job scams using Google Gemini LL
 
 3. **Install Python dependencies:**
    ```bash
-   pip install -r requirements.txt
+   pip3 install -r requirements.txt
    ```
 
 4. **Get API Keys:**
@@ -66,7 +66,7 @@ python main.py --input "data/data-ashley(Sheet1).csv"
 **With custom options:**
 ```bash
 # Custom output directory
-python main.py --input "data/data-ashley(Sheet1).csv" --output-dir detect_res
+python3 main.py --input "data/data-ashley.csv" --output-dir detect_res
 
 # Custom filenames
 python main.py --input "data/data-ashley(Sheet1).csv" --results-file ashley_results.csv --report-file ashley_report.json

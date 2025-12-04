@@ -10,6 +10,7 @@ import argparse
 from pathlib import Path
 
 from scam_detector import JobScamDetector
+from scam_detector.config import DEFAULT_WORKERS
 
 # Configure logging
 logging.basicConfig(
@@ -28,8 +29,9 @@ def main():
     parser.add_argument(
         '--input', 
         type=str,
-        required=True,
-        help='Path to input CSV file with complaints'
+        required=False,
+        default='data/data-merged.csv',
+        help='Path to input CSV file with complaints (default: data/data-merged.csv)'
     )
     parser.add_argument(
         '--output-dir',
@@ -54,6 +56,19 @@ def main():
         type=str,
         default=None,
         help='Custom filename for report JSON (default: scam_analysis_report.json)'
+    )
+    parser.add_argument(
+        '--workers',
+        type=int,
+        default=DEFAULT_WORKERS,
+        help=f'Number of parallel workers for analysis (default: {DEFAULT_WORKERS}, increase for faster processing)'
+    )
+    parser.add_argument(
+        '--output-format',
+        type=str,
+        choices=['json', 'pdf', 'both'],
+        default='json',
+        help='Output format for report: json, pdf, or both (default: json)'
     )
     
     args = parser.parse_args()
@@ -81,18 +96,36 @@ def main():
         sys.exit(1)
     
     try:
+        # Track start time
+        import time
+        start_time = time.time()
+        
         # Analyze dataset
         logger.info(f"Starting analysis of {input_path}")
+        logger.info(f"Using {args.workers} worker(s) for parallel processing")
         results_df = detector.analyze_dataset(
             str(input_path),
-            output_filename=args.results_file
+            output_filename=args.results_file,
+            workers=args.workers,
+            prompt_mode=args.prompt_mode
         )
+        
+        # Calculate run time
+        end_time = time.time()
+        run_time_seconds = end_time - start_time
+        run_time_minutes = run_time_seconds / 60
+        
+        # Get model name from detector
+        model_name = detector.gemini_client.model_name
         
         # Generate report
         logger.info("Generating analysis report...")
         report = detector.generate_report(
             results_df=results_df,
-            report_filename=args.report_file
+            report_filename=args.report_file,
+            output_format=args.output_format,
+            model_name=model_name,
+            run_time_seconds=run_time_seconds
         )
         
         # Print summary
@@ -104,9 +137,34 @@ def main():
         print(f"Average Risk Score (Gemini scam_probability): {report['summary']['average_risk_score']:.1f}%")
         print(f"Median Risk Score: {report['summary']['median_risk_score']:.1f}%")
         
-        print("\nTop Red Flags Found:")
-        for flag, count in list(report['top_red_flags'].items())[:5]:
-            print(f"  - {flag}: {count} occurrences")
+        # Top Red Flags by Category
+        top_red_flags_by_category = report.get('top_red_flags_by_category', {})
+        if top_red_flags_by_category:
+            print("\nTop Red Flags by Category:")
+            category_names = {
+                'communication': 'Communication',
+                'financial': 'Financial',
+                'job_posting': 'Job Posting',
+                'hiring_process': 'Hiring Process',
+                'work_activity': 'Work Activity'
+            }
+            for category, flags_dict in top_red_flags_by_category.items():
+                if flags_dict:
+                    print(f"\n  {category_names.get(category, category)}:")
+                    for flag, count in list(flags_dict.items())[:3]:
+                        print(f"    - {flag}: {count} occurrences")
+        else:
+            # Fallback to overall top flags
+            print("\nTop Red Flags Found:")
+            for flag, count in list(report['top_red_flags'].items())[:5]:
+                print(f"  - {flag}: {count} occurrences")
+        
+        # Top Vulnerability Factors
+        vulnerability_factors = report.get('top_vulnerability_factors', {})
+        if vulnerability_factors:
+            print("\nTop Vulnerability Factors:")
+            for factor, count in list(vulnerability_factors.items())[:5]:
+                print(f"  - {factor}: {count} occurrences")
         
         print("\nScam Type Distribution:")
         for scam_type, count in list(report['scam_type_distribution'].items())[:5]:
@@ -114,10 +172,17 @@ def main():
         
         # Print file locations
         results_path = detector.file_handler.get_results_path(args.results_file)
-        report_path = detector.file_handler.get_report_path(args.report_file)
         
         print(f"\nDetailed results saved to: {results_path}")
-        print(f"Analysis report saved to: {report_path}")
+        
+        if args.output_format in ['json', 'both']:
+            report_path = detector.file_handler.get_report_path(args.report_file)
+            print(f"Analysis report (JSON) saved to: {report_path}")
+        
+        if args.output_format in ['pdf', 'both']:
+            report_res_dir = Path(__file__).parent / "report_res"
+            print(f"Analysis report (PDF) saved to: {report_res_dir}/")
+        
         print("="*50)
         
     except Exception as e:
