@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Protect README.md - always keep local version during merges
+README.md merge=ours
